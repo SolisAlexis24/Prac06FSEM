@@ -9,6 +9,10 @@
 import smbus2
 import struct
 import time
+import csv
+import matplotlib
+matplotlib.use('AGG')	# Usando el rasterizado a .png
+import matplotlib.pyplot as plt
 
 # RP2040 I2C device address
 SLAVE_ADDR = 0x0A # I2C Address of RP2040
@@ -20,6 +24,35 @@ LOG_FILE = './temp.log'
 # RPI version 1 requires smbus.SMBus(0)
 i2c = smbus2.SMBus(1)
 
+Y_MIN = -55.0
+Y_MAX = 150.0
+
+def graphTemperature():
+	time = []
+	temp = []
+	try:
+		with open(LOG_FILE, 'r') as fp:
+			tempFile = csv.reader(fp, delimiter=' ')
+			next(tempFile)
+			for line in tempFile:
+				time.append(float(line[0]))
+				temp.append(float(line[1]))
+	except:
+		return
+
+	if len(time) <= 1 or len(temp) <= 1 or len(time) != len(temp):
+		return
+
+
+	plt.plot(time, temp, label='Temperatura')
+	plt.ylim(Y_MIN, Y_MAX)
+	plt.title("Temperatura en funcion del tiempo")
+	plt.xlabel("Tiempo UNIX [s]")
+	plt.ylabel("Temperatura [*C]")
+	plt.legend()
+	plt.savefig("Temperatura.png")
+
+
 def readTemperature():
 	try:
 		msg = smbus2.i2c_msg.read(SLAVE_ADDR, 4)
@@ -30,7 +63,7 @@ def readTemperature():
 		for c in data:
 			ba.append(int(c))
 		temp = struct.unpack('<f', ba)[0]
-		print(f"Temperatura recibida: {temp: .4f} *C")
+		#print(f"Temperatura recibida: {temp: .4f} *C")
 		#print('Received temp: {} = {}'.format(data, temp))
 		return temp
 	except:
@@ -39,7 +72,7 @@ def readTemperature():
 def log_temp(temperature):
 	try:
 		with open(LOG_FILE, 'a+') as fp:
-			fp.write('{} {}°C\n'.format(
+			fp.write('{} {}\n'.format(
 				time.time(),
 				temperature
 			))
@@ -47,10 +80,12 @@ def log_temp(temperature):
 		return
 
 
-
 def main():
-	with open(LOG_FILE, 'w') as fp:
-		pass
+	try:
+		with open(LOG_FILE, 'w') as fp:
+			fp.write('Tiempo[s] Temperatura[*C]\n')
+	except:
+		return
 
 	while True:
 		try:
@@ -60,5 +95,7 @@ def main():
 		except KeyboardInterrupt:
 			return
 
+
 if __name__ == '__main__':
 	main()
+	graphTemperature()
