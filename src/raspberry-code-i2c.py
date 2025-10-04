@@ -24,8 +24,8 @@ LOG_FILE = './temp.log'
 # RPI version 1 requires smbus.SMBus(0)
 i2c = smbus2.SMBus(1)
 
-Y_MIN = -55.0
-Y_MAX = 150.0
+Y_MIN = 0.0
+Y_MAX = 70.0
 
 def graphTemperature():
 	time = []
@@ -47,8 +47,8 @@ def graphTemperature():
 	plt.plot(time, temp, label='Temperatura')
 	plt.ylim(Y_MIN, Y_MAX)
 	plt.title("Temperatura en funcion del tiempo")
-	plt.xlabel("Tiempo UNIX [s]")
-	plt.ylabel("Temperatura [*C]")
+	plt.xlabel("Tiempo UNIX")
+	plt.ylabel("Temperatura [°C]")
 	plt.legend()
 	plt.savefig("Temperatura.png")
 
