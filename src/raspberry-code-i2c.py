@@ -29,15 +29,16 @@ def readTemperature():
 		ba = bytearray()
 		for c in data:
 			ba.append(int(c))
-		temp = struct.unpack('<f', ba)
-		print('Received temp: {} = {}'.format(data, temp))
+		temp = struct.unpack('<f', ba)[0]
+		print(f"Temperatura recibida: {temp: .4f} *C")
+		#print('Received temp: {} = {}'.format(data, temp))
 		return temp
 	except:
 		return None
 
 def log_temp(temperature):
 	try:
-		with open(LOG_FILE, 'w+') as fp:
+		with open(LOG_FILE, 'a+') as fp:
 			fp.write('{} {}°C\n'.format(
 				time.time(),
 				temperature
@@ -45,7 +46,12 @@ def log_temp(temperature):
 	except:
 		return
 
+
+
 def main():
+	with open(LOG_FILE, 'w') as fp:
+		pass
+
 	while True:
 		try:
 			cTemp = readTemperature()
