@@ -51,6 +51,7 @@ def graphTemperature():
 	plt.ylabel("Temperatura [°C]")
 	plt.legend()
 	plt.savefig("Temperatura.png")
+	plt.clf()
 
 
 def readTemperature():
@@ -79,23 +80,31 @@ def log_temp(temperature):
 	except:
 		return
 
-
-def main():
+def reset_log():
 	try:
 		with open(LOG_FILE, 'w') as fp:
 			fp.write('Tiempo[s] Temperatura[*C]\n')
 	except:
 		return
 
+def main():
+	reset_log()
+	start = time.time()
 	while True:
 		try:
+			if time.time() - start >= 60:
+				start = time.time()
+				graphTemperature()
+				print("Nueva grafica disponible")
+				reset_log()
+
 			cTemp = readTemperature()
 			log_temp(cTemp)
 			time.sleep(1)
+
 		except KeyboardInterrupt:
 			return
 
 
 if __name__ == '__main__':
 	main()
-	graphTemperature()
