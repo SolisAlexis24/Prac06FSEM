@@ -13,6 +13,7 @@
 # ## ############################################################
 from i2cslave import I2CSlave
 from utime import sleep_ms, sleep_us
+import pico_code_adc as adc
 import ustruct
 
 VAREF          = 2.7273
@@ -21,9 +22,10 @@ I2C_SLAVE_ADDR = 0x0A
 
 def main():
 	setup()
+	adc.setup()
 	while True:
 		# 1. Get temperature
-		temperature = read_temp()
+		temperature = adc.read_avg_temp()
 		# 2. Convert temperature from pyfloat to bytes
 		data = ustruct.pack('<f', temperature)
 
@@ -42,19 +44,16 @@ def main():
 # end def
 
 
-def read_temp():
-	# '''Reads temperature in C from the ADC'''
-	return 25.0
-# end def
+# def read_temp():
+# 	# '''Reads temperature in C from the ADC'''
+# 	return 25.0
+# # end def
 
 
 def setup():
-	global i2c, adcm, adcp
+	global i2c
 	i2c = I2CSlave(address=I2C_SLAVE_ADDR)
-	adcm = machine.ADC(0)         # Init ADC0
-	adcp = machine.ADC(1)         # Init ADC1
 # end def
 
-
-if __name__ == '__main__':
-	main()
+# if __name__ == '__main__':
+# 	main()
