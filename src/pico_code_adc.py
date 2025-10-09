@@ -9,7 +9,7 @@
 from machine import ADC, Pin     # Board Analogic-to-Digital Converter
 from utime import sleep_ms       # Delay function in milliseconds
 
-VAREF = 3.23
+V_ADC = 3.3
 
 def setup():
     '''
@@ -31,10 +31,10 @@ def read_temp():
     # Calculate the difference. when V+ is smaller than V- we have negative temp
     vdiff  = vplus - vminus
     # Then, we need to convert values from codes to V and then to temperature in °C
-    # To compute V from codes, we need to multiply by the conversion factor V = codes * VREF/2^(16)-1
+    # To compute V from codes, we need to multiply by the conversion factor V = codes * 3.3/2^(16)-1
     # To convert given V into °C, we need to recall that for LM35 1°C = 0.01V
-    # Temp = 0.01 * Codes * VREF/65535 -> Temp = codes * VREF/655.35
-    temp = vdiff * VAREF / 655.35
+    # Temp = 0.01 * Codes * 3.3/65535 -> Temp = codes * 3.3/655.35
+    temp = vdiff * V_ADC / 655.35
     return temp
 # end def
 
