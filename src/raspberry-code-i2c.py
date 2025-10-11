@@ -64,8 +64,7 @@ def readTemperature():
 		for c in data:
 			ba.append(int(c))
 		temp = struct.unpack('<f', ba)[0]
-		#print(f"Temperatura recibida: {temp: .4f} *C")
-		#print('Received temp: {} = {}'.format(data, temp))
+		#print(f"Temperatura actual: {temp: .2f} °C")
 		return temp
 	except:
 		return None
