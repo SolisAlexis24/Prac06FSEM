@@ -9,11 +9,12 @@
 import smbus2
 import struct
 import time
+from datetime import datetime, timezone
 import csv
 import matplotlib
 matplotlib.use('AGG')	# Usando el rasterizado a .png
 import matplotlib.pyplot as plt
-
+import matplotlib.dates as mdates
 # RP2040 I2C device address
 SLAVE_ADDR = 0x0A # I2C Address of RP2040
 
@@ -24,8 +25,8 @@ LOG_FILE = './temp.log'
 # RPI version 1 requires smbus.SMBus(0)
 i2c = smbus2.SMBus(1)
 
-Y_MIN = 0.0
-Y_MAX = 70.0
+TEMP_MARGIN = 5
+GRAPH_PERIOD_S = 60
 
 def graphTemperature():
 	time = []
@@ -35,7 +36,7 @@ def graphTemperature():
 			tempFile = csv.reader(fp, delimiter=' ')
 			next(tempFile)
 			for line in tempFile:
-				time.append(float(line[0]))
+				time.append(datetime.fromtimestamp(float(line[0])).astimezone())
 				temp.append(float(line[1]))
 	except:
 		return
@@ -43,13 +44,20 @@ def graphTemperature():
 	if len(time) <= 1 or len(temp) <= 1 or len(time) != len(temp):
 		return
 
+	fig, ax = plt.subplots()
+	ax.plot(time, temp, label='Temperatura')
 
-	plt.plot(time, temp, label='Temperatura')
-	plt.ylim(Y_MIN, Y_MAX)
-	plt.title("Temperatura en funcion del tiempo")
-	plt.xlabel("Tiempo UNIX")
+	plt.ylim(min(temp)-TEMP_MARGIN, max(temp)+TEMP_MARGIN)
+
+	ax.xaxis.set_major_formatter(mdates.DateFormatter('%M:%S'))
+	ax.xaxis.set_major_locator(mdates.AutoDateLocator())
+
+	plt.title("Temperatura el {}/{}/{} a las {} h.".format(
+		time[0].day, time[0].month, time[0].year, time[0].hour))
+	plt.xlabel("Tiempo [min:seg]")
 	plt.ylabel("Temperatura [°C]")
 	plt.legend()
+	plt.tight_layout()
 	plt.savefig("Temperatura.png")
 	plt.clf()
 
@@ -64,7 +72,8 @@ def readTemperature():
 		for c in data:
 			ba.append(int(c))
 		temp = struct.unpack('<f', ba)[0]
-		#print(f"Temperatura actual: {temp: .2f} °C")
+		#cTime = datetime.utcnow().replace(tzinfo=timezone.utc).astimezone()
+		#print(f"Temperatura actual: {temp: .2f} °C @ {cTime}")
 		return temp
 	except:
 		return None
@@ -91,7 +100,7 @@ def main():
 	start = time.time()
 	while True:
 		try:
-			if time.time() - start >= 60:
+			if time.time() - start >= GRAPH_PERIOD_S:
 				start = time.time()
 				graphTemperature()
 				print("Nueva grafica disponible")
