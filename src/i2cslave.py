@@ -305,46 +305,46 @@ class I2CSlave():
 # end class
 
 
-__running = True
-def main1():
-	import random, ustruct
-	i2c = machine.I2C(1, sda=machine.Pin(2), scl=machine.Pin(3), freq=400_000)
-	print('Master ready')
-	devices = [hex(d) for d in i2c.scan()]
-	print('I2C devices:', devices)
-	ba = bytearray(2)
-
-	while __running:
-		ba[0] = random.randint(0, 255)
-		ba[1] = random.randint(0, 255)
-		i2c.writeto(0x55, ba)
-		sleep_ms(100) # Wait until slave finishes printing
-		res = i2c.readfrom(0x55, 2)
-		res = ustruct.unpack("<h", res)[0]
-		print('[Master] Slave says:', res)
-		sleep_ms(3000)
-# end def
-
-
-
-def main0():
-	import _thread, ustruct
-	_thread.start_new_thread(main1, [])
-
-	i2c = I2CSlave(address=0x55)
-	print('Slave ready')
-	while __running:
-		data = i2c.read()
-		a, b = ustruct.unpack("<BB", data)
-		print(f'[Slave ] Master says: {a} + {b}')
-		data = ustruct.pack('<h', a + b)
-		i2c.write(data)
-		sleep_ms(1000)
-# end def
-
-if __name__ == '__main__':
-	try:
-		main0()
-	except KeyboardInterrupt:
-		__running = False
-	__running = False
+# __running = True
+# def main1():
+# 	import random, ustruct
+# 	i2c = machine.I2C(1, sda=machine.Pin(2), scl=machine.Pin(3), freq=400_000)
+# 	print('Master ready')
+# 	devices = [hex(d) for d in i2c.scan()]
+# 	print('I2C devices:', devices)
+# 	ba = bytearray(2)
+# 
+# 	while __running:
+# 		ba[0] = random.randint(0, 255)
+# 		ba[1] = random.randint(0, 255)
+# 		i2c.writeto(0x55, ba)
+# 		sleep_ms(100) # Wait until slave finishes printing
+# 		res = i2c.readfrom(0x55, 2)
+# 		res = ustruct.unpack("<h", res)[0]
+# 		print('[Master] Slave says:', res)
+# 		sleep_ms(3000)
+# # end def
+# 
+# 
+# 
+# def main0():
+# 	import _thread, ustruct
+# 	_thread.start_new_thread(main1, [])
+# 
+# 	i2c = I2CSlave(address=0x55)
+# 	print('Slave ready')
+# 	while __running:
+# 		data = i2c.read()
+# 		a, b = ustruct.unpack("<BB", data)
+# 		print(f'[Slave ] Master says: {a} + {b}')
+# 		data = ustruct.pack('<h', a + b)
+# 		i2c.write(data)
+# 		sleep_ms(1000)
+# # end def
+# 
+# if __name__ == '__main__':
+# 	try:
+# 		main0()
+# 	except KeyboardInterrupt:
+# 		__running = False
+# 	__running = False
